@@ -1,0 +1,64 @@
+---
+title: "read files"
+output: html_document
+---
+
+Exploring the ability to read STR segmentation files for Zach.
+
+```{r setup, include=FALSE}
+library(arlodr)
+library(dplyr, warn.conflicts=FALSE)
+library(knitr)
+library(readr)
+library(readxl)
+library(tidyr)
+library(xts, warn.conflicts=FALSE)
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+fpath <- c("~/Project/R projects/read_str/")  
+```
+
+```{r}
+# read an individual file as test
+ fname_g <- paste0(fpath, "input_data/raw_files/BeverlyHillsCVB_201108.xls")
+ gspall_a <- readxl::read_excel(fname_g, sheet=2, col_names = FALSE, skip=7)
+
+a <-rep("text", 34)
+# update this file path to point toward appropriate folder on your computer
+#folder <- paste0(fpath, "input_data/Implan downloads/CT 2016-01-07")     
+folder <- paste0(fpath, "input_data/raw_files")     
+
+rep("numeric", 4)
+# example
+file_list <- list.files(path=folder)  #pattern="Output"
+data <- NULL
+data_list <- lapply(file_list, 
+                 function(x) 
+                   read_excel(paste(folder, "//", x, sep=''), sheet = 2, col_names = FALSE, skip=7))
+
+names(data_list) <- file_list
+library(data.table)
+combined2 <- rbindlist(data_list, fill=TRUE, idcol="id")
+
+
+# simple function to delete rows that have more than a 
+# certain number of NAs
+delete.na <- function(DF, n=0) {
+  DF[rowSums(is.na(DF)) <= n,]
+}
+
+# delete if at least x nas
+combined3 <- delete.na(combined2, 33)
+
+```
+
+Save output
+```{r}
+
+write_csv(combined3,paste0(fpath, "output_data/combined3.csv"))
+
+```
+
